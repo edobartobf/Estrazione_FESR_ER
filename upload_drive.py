@@ -1,19 +1,29 @@
-import json
 import os
 import sys
 from pathlib import Path
 
-from google.oauth2 import service_account
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 
 
-def upload_folder(folder_path, folder_id, sa_json_str):
-    creds = service_account.Credentials.from_service_account_info(
-        json.loads(sa_json_str), scopes=SCOPES
+def build_credentials(client_id, client_secret, refresh_token):
+    creds = Credentials(
+        token=None,
+        refresh_token=refresh_token,
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=client_id,
+        client_secret=client_secret,
+        scopes=SCOPES,
     )
+    creds.refresh(Request())
+    return creds
+
+
+def upload_folder(folder_path, folder_id, creds):
     service = build("drive", "v3", credentials=creds)
     uploaded = []
     for f in Path(folder_path).rglob("*"):
@@ -30,18 +40,24 @@ def upload_folder(folder_path, folder_id, sa_json_str):
 
 
 def main():
-    sa_json = os.environ.get("GDRIVE_SA_JSON")
+    client_id = os.environ.get("GDRIVE_CLIENT_ID")
+    client_secret = os.environ.get("GDRIVE_CLIENT_SECRET")
+    refresh_token = os.environ.get("GDRIVE_REFRESH_TOKEN")
     folder_id = os.environ.get("GDRIVE_FOLDER_ID")
     output_folder = os.environ.get("FESR_OUTPUT", "data")
 
-    if not sa_json:
-        print("ERROR: GDRIVE_SA_JSON non impostato", file=sys.stderr)
-        sys.exit(1)
-    if not folder_id:
-        print("ERROR: GDRIVE_FOLDER_ID non impostato", file=sys.stderr)
-        sys.exit(1)
+    for name, val in [
+        ("GDRIVE_CLIENT_ID", client_id),
+        ("GDRIVE_CLIENT_SECRET", client_secret),
+        ("GDRIVE_REFRESH_TOKEN", refresh_token),
+        ("GDRIVE_FOLDER_ID", folder_id),
+    ]:
+        if not val:
+            print(f"ERROR: {name} non impostato", file=sys.stderr)
+            sys.exit(1)
 
-    uploaded = upload_folder(output_folder, folder_id, sa_json)
+    creds = build_credentials(client_id, client_secret, refresh_token)
+    uploaded = upload_folder(output_folder, folder_id, creds)
     folder_url = f"https://drive.google.com/drive/folders/{folder_id}"
     print(f"Caricati {len(uploaded)} file su Drive: {folder_url}")
     Path("drive_url.txt").write_text(folder_url, encoding="utf-8")

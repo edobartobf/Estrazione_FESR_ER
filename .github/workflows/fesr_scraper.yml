@@ -31,7 +31,7 @@ jobs:
           python-version: "3.11"
 
       - name: Installa dipendenze
-        run: pip install requests beautifulsoup4 google-auth google-api-python-client
+        run: pip install requests beautifulsoup4 google-auth google-auth-oauthlib google-api-python-client
 
       - name: Calcola periodo
         id: dates
@@ -76,17 +76,19 @@ jobs:
       - name: Controlla secrets disponibili
         id: check
         env:
-          GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
         run: |
-          [ -n "$GDRIVE_SA_JSON" ] && echo "gdrive=true" >> $GITHUB_OUTPUT || echo "gdrive=false" >> $GITHUB_OUTPUT
+          [ -n "$GDRIVE_REFRESH_TOKEN" ] && echo "gdrive=true" >> $GITHUB_OUTPUT || echo "gdrive=false" >> $GITHUB_OUTPUT
           [ -n "$SMTP_HOST" ] && echo "smtp=true" >> $GITHUB_OUTPUT || echo "smtp=false" >> $GITHUB_OUTPUT
 
       - name: Carica su Google Drive
         if: steps.check.outputs.gdrive == 'true'
         run: python upload_drive.py
         env:
-          GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
           GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
           FESR_OUTPUT: data
 
