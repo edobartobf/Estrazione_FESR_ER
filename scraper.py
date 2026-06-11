@@ -1,3 +1,5 @@
+import os
+from datetime import datetime
 from pathlib import Path
 from delibere import scraperesults, writecsv, writejson, writesummaries
 
@@ -43,19 +45,45 @@ from delibere import scraperesults, writecsv, writejson, writesummaries
 #   SCARICA_PDF = True
 #   MAX_PAGINE = None
 #   MAX_PDF = 20
+#
+# - Filtrare per periodo (una settimana):
+#   DATA_DA = "04/06/2026"
+#   DATA_A  = "11/06/2026"
 
 ANNI = "2026"
 KEYWORD = "FESR"
 CARTELLA_OUTPUT = "data"
 
-SCARICA_LINK_PDF = True
-SCARICA_PDF = True
+SCARICA_LINK_PDF = False
+SCARICA_PDF = False
 
-MAX_PAGINE = 2
+MAX_PAGINE = None
 MAX_PDF = None
 
 PAUSA_SECONDI = 0.4
 TIMEOUT_SECONDI = 30
+
+DATA_DA = None  # Esempio: "04/06/2026"
+DATA_A  = None  # Esempio: "11/06/2026"
+
+
+def applysecrets():
+    global KEYWORD, DATA_DA, DATA_A, ANNI, CARTELLA_OUTPUT
+    val = os.environ.get("FESR_KEYWORD")
+    if val:
+        KEYWORD = val
+    val = os.environ.get("FESR_DATA_DA")
+    if val is not None:
+        DATA_DA = val or None
+    val = os.environ.get("FESR_DATA_A")
+    if val is not None:
+        DATA_A = val or None
+    val = os.environ.get("FESR_ANNI")
+    if val:
+        ANNI = val
+    val = os.environ.get("FESR_OUTPUT")
+    if val:
+        CARTELLA_OUTPUT = val
 
 
 def leggianni(value):
@@ -75,15 +103,36 @@ def leggianni(value):
     return [str(year) for year in value]
 
 
+def datesuffix(datada, dataa):
+    MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"]
+
+    def _tok(d):
+        dt = datetime.strptime(d, "%d/%m/%Y")
+        return f"{dt.day:02d}{MESI[dt.month - 1]}"
+
+    if datada is None and dataa is None:
+        return ""
+    if datada is not None and dataa is None:
+        return _tok(datada)
+    if datada is None and dataa is not None:
+        return _tok(dataa)
+    return f"{_tok(datada)}_{_tok(dataa)}"
+
+
 def main():
+    applysecrets()
     folder = Path(CARTELLA_OUTPUT)
     anni = leggianni(ANNI)
     allrecords = []
+    ds = datesuffix(DATA_DA, DATA_A)
 
     for anno in anni:
         print("")
         print(f"Scarico anno {anno}, keyword {KEYWORD}")
-        suffix = f"{anno}_{KEYWORD.lower()}".replace(" ", "_")
+        if ds:
+            suffix = f"{anno}_{ds}_{KEYWORD.lower()}".replace(" ", "_")
+        else:
+            suffix = f"{anno}_{KEYWORD.lower()}".replace(" ", "_")
 
         records = scraperesults(
             anno=anno,
@@ -95,6 +144,8 @@ def main():
             maxpdf=MAX_PDF,
             timeout=TIMEOUT_SECONDI,
             outputfolder=CARTELLA_OUTPUT,
+            datada=DATA_DA,
+            dataa=DATA_A,
         )
 
         csvpath = folder / f"delibere_{suffix}.csv"
@@ -102,7 +153,7 @@ def main():
 
         writecsv(csvpath, records)
         writejson(jsonpath, records)
-        writesummaries(records, anno, KEYWORD, folder)
+        writesummaries(records, anno, KEYWORD, folder, date_suffix=suffix)
         allrecords.extend(records)
 
         print(f"Anno {anno} completato.")
@@ -111,12 +162,15 @@ def main():
         print(f"JSON: {jsonpath}")
 
     if len(anni) > 1:
-        suffix = f"{anni[0]}_{anni[-1]}_{KEYWORD.lower()}".replace(" ", "_")
+        if ds:
+            suffix = f"{anni[0]}_{anni[-1]}_{ds}_{KEYWORD.lower()}".replace(" ", "_")
+        else:
+            suffix = f"{anni[0]}_{anni[-1]}_{KEYWORD.lower()}".replace(" ", "_")
         csvpath = folder / f"delibere_{suffix}_tutti_gli_anni.csv"
         jsonpath = folder / f"delibere_{suffix}_tutti_gli_anni.json"
         writecsv(csvpath, allrecords)
         writejson(jsonpath, allrecords)
-        writesummaries(allrecords, f"{anni[0]}_{anni[-1]}", KEYWORD, folder)
+        writesummaries(allrecords, f"{anni[0]}_{anni[-1]}", KEYWORD, folder, date_suffix=suffix)
 
     print("")
     print("Download completato.")

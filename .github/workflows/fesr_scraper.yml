@@ -1,0 +1,93 @@
+# Aggiornato: Phase 3 — Drive Upload + Email Notification
+name: FESR Scraper
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # Ogni lunedì alle 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      keyword:
+        description: "Keyword di ricerca (default: FESR)"
+        required: false
+        default: "FESR"
+      data_da:
+        description: "Data da (DD/MM/YYYY) — lascia vuoto per settimana precedente automatica"
+        required: false
+      data_a:
+        description: "Data a (DD/MM/YYYY) — lascia vuoto per settimana precedente automatica"
+        required: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installa dipendenze
+        run: pip install requests beautifulsoup4 google-auth google-api-python-client
+
+      - name: Calcola periodo
+        id: dates
+        run: |
+          python - <<'EOF'
+          import os
+          from datetime import date, timedelta
+
+          data_da = os.environ.get("INPUT_DATA_DA", "").strip()
+          data_a  = os.environ.get("INPUT_DATA_A", "").strip()
+
+          if not data_da or not data_a:
+              today = date.today()
+              last_monday = today - timedelta(days=today.weekday() + 7)
+              last_sunday  = last_monday + timedelta(days=6)
+              data_da = last_monday.strftime("%d/%m/%Y")
+              data_a  = last_sunday.strftime("%d/%m/%Y")
+
+          with open(os.environ["GITHUB_ENV"], "a") as f:
+              f.write(f"FESR_DATA_DA={data_da}\n")
+              f.write(f"FESR_DATA_A={data_a}\n")
+
+          print(f"Periodo: {data_da} — {data_a}")
+          EOF
+        env:
+          INPUT_DATA_DA: ${{ github.event.inputs.data_da }}
+          INPUT_DATA_A: ${{ github.event.inputs.data_a }}
+
+      - name: Esegui scraper
+        run: python scraper.py
+        env:
+          FESR_KEYWORD: ${{ github.event.inputs.keyword || 'FESR' }}
+          # FESR_DATA_DA e FESR_DATA_A iniettate dal passo precedente via GITHUB_ENV
+
+      - name: Carica output
+        uses: actions/upload-artifact@v4
+        with:
+          name: fesr-output-${{ github.run_id }}
+          path: data/
+          if-no-files-found: warn
+
+      - name: Carica su Google Drive
+        if: ${{ secrets.GDRIVE_SA_JSON != '' }}
+        run: python upload_drive.py
+        env:
+          GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          FESR_OUTPUT: data
+
+      - name: Invia email di riepilogo
+        if: ${{ secrets.SMTP_HOST != '' }}
+        run: python notify_email.py
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
+          FESR_OUTPUT: data

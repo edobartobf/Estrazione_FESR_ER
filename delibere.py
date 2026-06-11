@@ -3,6 +3,7 @@ import json
 import re
 import time
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import unquote, urljoin
 
@@ -47,7 +48,7 @@ def decodehtml(response):
     return response.content.decode("ISO-8859-1", errors="replace")
 
 
-def buildpayload(anno, keyword):
+def buildpayload(anno, keyword, datada=None, dataa=None):
     return {
         "REFRESH": "Y",
         "actionURL": "AdapterHTTP?ACTION_NAME=ACTIONRICERCADELIBERE",
@@ -55,8 +56,8 @@ def buildpayload(anno, keyword):
         "tipoAtto": "",
         "annoAdozione": str(anno),
         "numAdozione": "",
-        "dataAdozioneDa": "",
-        "dataAdozioneA": "",
+        "dataAdozioneDa": datada or "",
+        "dataAdozioneA": dataa or "",
         "oggetto": keyword,
         "did": "true",
         "QUERY_STRING{ACTION_NAME=ACTIONRICERCADELIBERE&POPULATING=LIST&tableId=ricerca_delibere&HTML_POINTER=submitRicerca}": "Cerca",
@@ -64,7 +65,7 @@ def buildpayload(anno, keyword):
     }
 
 
-def buildpageparams(anno, keyword, page):
+def buildpageparams(anno, keyword, page, datada=None, dataa=None):
     return {
         "ANNOADOZIONE": str(anno),
         "REFRESH": "Y",
@@ -76,8 +77,8 @@ def buildpageparams(anno, keyword, page):
         "HTML_POINTER": "submitRicerca",
         "PAG_SIZE_RICERCA_DELIBERE": "10",
         "TIPOATTO": "",
-        "DATAADOZIONEA": "",
-        "DATAADOZIONEDA": "",
+        "DATAADOZIONEA": dataa or "",
+        "DATAADOZIONEDA": datada or "",
         "NUMADOZIONE": "",
         "ENTE": "1",
         "DID": "true",
@@ -85,16 +86,16 @@ def buildpageparams(anno, keyword, page):
     }
 
 
-def fetchfirstpage(session, anno, keyword, timeout):
-    response = session.post(BASE_URL, data=buildpayload(anno, keyword), timeout=timeout)
+def fetchfirstpage(session, anno, keyword, timeout, datada=None, dataa=None):
+    response = session.post(BASE_URL, data=buildpayload(anno, keyword, datada=datada, dataa=dataa), timeout=timeout)
     response.raise_for_status()
     return decodehtml(response)
 
 
-def fetchpage(session, anno, keyword, page, timeout):
+def fetchpage(session, anno, keyword, page, timeout, datada=None, dataa=None):
     if page == 1:
-        return fetchfirstpage(session, anno, keyword, timeout)
-    response = session.get(BASE_URL, params=buildpageparams(anno, keyword, page), timeout=timeout)
+        return fetchfirstpage(session, anno, keyword, timeout, datada=datada, dataa=dataa)
+    response = session.get(BASE_URL, params=buildpageparams(anno, keyword, page, datada=datada, dataa=dataa), timeout=timeout)
     response.raise_for_status()
     return decodehtml(response)
 
@@ -265,7 +266,15 @@ def scraperesults(
     maxpdf=None,
     timeout=30,
     outputfolder="data",
+    datada=None,
+    dataa=None,
 ):
+    for label, value in (("datada", datada), ("dataa", dataa)):
+        if value is not None:
+            try:
+                datetime.strptime(value, "%d/%m/%Y")
+            except ValueError:
+                raise ValueError(f"{label} deve essere nel formato DD/MM/YYYY, ricevuto: {value!r}")
     session = requests.Session()
     session.headers.update(HEADERS)
     allrecords = []
@@ -273,7 +282,7 @@ def scraperesults(
     page = 1
     pdfcount = 0
     while True:
-        html = fetchpage(session, anno, keyword, page, timeout)
+        html = fetchpage(session, anno, keyword, page, timeout, datada=datada, dataa=dataa)
         records, counter = parserows(html, anno, keyword, page)
         if totalpages is None:
             totalpages = counter.get("total_pages") or 1
@@ -340,8 +349,8 @@ def writesummary(path, rows):
     writecsv(path, rows, ["valore", "conteggio"])
 
 
-def writesummaries(records, anno, keyword, folder):
-    suffix = f"{anno}_{keyword.lower()}".replace(" ", "_")
+def writesummaries(records, anno, keyword, folder, date_suffix=None):
+    suffix = date_suffix if date_suffix else f"{anno}_{keyword.lower()}".replace(" ", "_")
     writesummary(folder / f"riepilogo_azioni_{suffix}.csv", countfield(records, "azioni"))
     writesummary(folder / f"riepilogo_manovre_{suffix}.csv", countfield(records, "tipo_manovra"))
     writesummary(folder / f"riepilogo_beneficiari_{suffix}.csv", countfield(records, "beneficiario"))
