@@ -73,8 +73,17 @@ jobs:
           path: data/
           if-no-files-found: warn
 
+      - name: Controlla secrets disponibili
+        id: check
+        env:
+          GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+        run: |
+          [ -n "$GDRIVE_SA_JSON" ] && echo "gdrive=true" >> $GITHUB_OUTPUT || echo "gdrive=false" >> $GITHUB_OUTPUT
+          [ -n "$SMTP_HOST" ] && echo "smtp=true" >> $GITHUB_OUTPUT || echo "smtp=false" >> $GITHUB_OUTPUT
+
       - name: Carica su Google Drive
-        if: ${{ secrets.GDRIVE_SA_JSON != '' }}
+        if: steps.check.outputs.gdrive == 'true'
         run: python upload_drive.py
         env:
           GDRIVE_SA_JSON: ${{ secrets.GDRIVE_SA_JSON }}
@@ -82,7 +91,7 @@ jobs:
           FESR_OUTPUT: data
 
       - name: Invia email di riepilogo
-        if: ${{ secrets.SMTP_HOST != '' }}
+        if: steps.check.outputs.smtp == 'true'
         run: python notify_email.py
         env:
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
