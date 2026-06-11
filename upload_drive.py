@@ -31,11 +31,25 @@ def datesuffix(datada, dataa):
     return f"{_tok(datada)}_{_tok(dataa)}"
 
 
-def nome_cartella(datada, dataa):
-    suffix = datesuffix(datada, dataa)
-    if suffix:
-        return f"FESR_{suffix}"
-    return f"FESR_{date.today().strftime('%Y%m%d')}"
+def nome_cartella(datada, dataa, keyword=None):
+    MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"]
+
+    def _tok(d, prefix):
+        try:
+            dt = datetime.strptime(d, "%d/%m/%Y")
+        except ValueError:
+            raise ValueError(f"Formato data non valido: '{d}' — atteso DD/MM/YYYY")
+        return f"{prefix}{dt.day:02d}{MESI[dt.month - 1]}"
+
+    today = date.today().strftime("%Y%m%d")
+    parts = [today]
+    if datada is not None:
+        parts.append(_tok(datada, "da"))
+    if dataa is not None:
+        parts.append(_tok(dataa, "a"))
+    if keyword:
+        parts.append(keyword.strip())
+    return "_".join(parts)
 
 
 def build_credentials(client_id, client_secret, refresh_token):
@@ -113,7 +127,8 @@ def main():
     service = build("drive", "v3", credentials=creds)
     datada = os.environ.get("FESR_DATA_DA")
     dataa = os.environ.get("FESR_DATA_A")
-    cartella_nome = nome_cartella(datada, dataa)
+    keyword = os.environ.get("FESR_KEYWORD") or None
+    cartella_nome = nome_cartella(datada, dataa, keyword)
     subfolder_id = create_subfolder(service, folder_id, cartella_nome)
     uploaded = upload_to_subfolder(output_folder, subfolder_id, service)
     subfolder_url = f"https://drive.google.com/drive/folders/{subfolder_id}"

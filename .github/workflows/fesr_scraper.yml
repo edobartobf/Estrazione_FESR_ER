@@ -98,6 +98,7 @@ jobs:
           GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
           GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
           FESR_OUTPUT: data
+          FESR_KEYWORD: ${{ github.event.inputs.keyword }}
 
       - name: Invia email di riepilogo
         if: steps.check.outputs.smtp == 'true'
