@@ -3,6 +3,7 @@ import sys
 from datetime import datetime, date
 from pathlib import Path
 
+from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -15,7 +16,10 @@ def datesuffix(datada, dataa):
     MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"]
 
     def _tok(d):
-        dt = datetime.strptime(d, "%d/%m/%Y")
+        try:
+            dt = datetime.strptime(d, "%d/%m/%Y")
+        except ValueError:
+            raise ValueError(f"Formato data non valido: '{d}' — atteso DD/MM/YYYY")
         return f"{dt.day:02d}{MESI[dt.month - 1]}"
 
     if datada is None and dataa is None:
@@ -43,7 +47,11 @@ def build_credentials(client_id, client_secret, refresh_token):
         client_secret=client_secret,
         scopes=SCOPES,
     )
-    creds.refresh(Request())
+    try:
+        creds.refresh(Request())
+    except RefreshError:
+        print("ERROR: impossibile rinnovare le credenziali Drive. Verificare GDRIVE_REFRESH_TOKEN.", file=sys.stderr)
+        sys.exit(1)
     return creds
 
 
@@ -54,8 +62,11 @@ def create_subfolder(service, parent_id, name):
         "parents": [parent_id],
     }
     result = service.files().create(body=body, fields="id").execute()
+    subfolder_id = result.get("id")
+    if not subfolder_id:
+        raise RuntimeError(f"Drive API non ha restituito un ID per la sottocartella '{name}': {result}")
     print(f"Sottocartella creata: {name}")
-    return result["id"]
+    return subfolder_id
 
 
 def upload_to_subfolder(folder_path, subfolder_id, service):
@@ -65,9 +76,13 @@ def upload_to_subfolder(folder_path, subfolder_id, service):
             continue
         media = MediaFileUpload(str(f), resumable=True)
         metadata = {"name": f.name, "parents": [subfolder_id]}
-        result = service.files().create(
-            body=metadata, media_body=media, fields="id,name"
-        ).execute()
+        try:
+            result = service.files().create(
+                body=metadata, media_body=media, fields="id,name"
+            ).execute()
+        except Exception as exc:
+            print(f"ERROR: upload fallito per '{f.name}': {exc}", file=sys.stderr)
+            raise
         uploaded.append(result)
         print(f"Caricato: {f.name}")
     return uploaded
@@ -89,6 +104,10 @@ def main():
         if not val:
             print(f"ERROR: {name} non impostato", file=sys.stderr)
             sys.exit(1)
+
+    if not Path(output_folder).is_dir():
+        print(f"ERROR: cartella output '{output_folder}' non trovata — nessun file da caricare.", file=sys.stderr)
+        sys.exit(1)
 
     creds = build_credentials(client_id, client_secret, refresh_token)
     service = build("drive", "v3", credentials=creds)
