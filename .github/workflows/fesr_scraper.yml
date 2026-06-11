@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       keyword:
-        description: "Keyword di ricerca (default: FESR)"
+        description: "Keyword di ricerca (lascia vuoto per scaricare tutto)"
         required: false
-        default: "FESR"
+        default: ""
       data_da:
         description: "Data da (DD/MM/YYYY) — lascia vuoto per settimana precedente automatica"
         required: false
@@ -63,7 +63,7 @@ jobs:
       - name: Esegui scraper
         run: python scraper.py
         env:
-          FESR_KEYWORD: ${{ github.event.inputs.keyword || 'FESR' }}
+          FESR_KEYWORD: ${{ github.event.inputs.keyword }}
           FESR_SCARICA_LINK_PDF: "true"
           FESR_SCARICA_PDF: "true"
           # FESR_DATA_DA e FESR_DATA_A iniettate dal passo precedente via GITHUB_ENV
