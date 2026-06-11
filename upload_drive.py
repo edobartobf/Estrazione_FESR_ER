@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime, date
 from pathlib import Path
 
 from google.auth.transport.requests import Request
@@ -8,6 +9,29 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
+
+
+def datesuffix(datada, dataa):
+    MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"]
+
+    def _tok(d):
+        dt = datetime.strptime(d, "%d/%m/%Y")
+        return f"{dt.day:02d}{MESI[dt.month - 1]}"
+
+    if datada is None and dataa is None:
+        return ""
+    if datada is not None and dataa is None:
+        return _tok(datada)
+    if datada is None and dataa is not None:
+        return _tok(dataa)
+    return f"{_tok(datada)}_{_tok(dataa)}"
+
+
+def nome_cartella(datada, dataa):
+    suffix = datesuffix(datada, dataa)
+    if suffix:
+        return f"FESR_{suffix}"
+    return f"FESR_{date.today().strftime('%Y%m%d')}"
 
 
 def build_credentials(client_id, client_secret, refresh_token):
