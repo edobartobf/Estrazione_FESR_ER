@@ -9,16 +9,14 @@ Usato da analisti per monitorare le delibere FESR 2021-2027 senza accesso manual
 
 Estrarre tutte le delibere FESR di un periodo in modo affidabile e senza intervento manuale, con output pronti all'analisi.
 
-## Current Milestone: v1.0 — Filtro per periodo + Automazione settimanale
+## Current Milestone: v1.1 — Drive PDF + Cartella Settimanale
 
-**Goal:** Aggiungere il filtraggio per data al motore di scraping e automatizzare il download settimanale via GitHub Actions con notifica email e upload su Google Drive.
+**Goal:** Caricare i PDF delle delibere su Google Drive insieme al CSV riassuntivo, organizzati in una sottocartella denominata con il periodo di riferimento.
 
 **Target features:**
-- Filtro per data (DATA_DA / DATA_A) in scraper.py e delibere.py
-- Auto-calcolo "settimana precedente" per i parametri data
-- GitHub Actions: cron settimanale, download FESR + PDF
-- Upload output (PDF + CSV/JSON) su Google Drive
-- Email di riepilogo ai destinatari configurati
+- Download PDF abilitato nell'automazione settimanale (SCARICA_PDF + SCARICA_LINK_PDF via env var)
+- Creazione sottocartella Drive per ogni run con nome che riflette il periodo (es. `FESR_2026_W23`)
+- Upload PDF + CSV riassuntivo nella sottocartella, non flat in GDRIVE_FOLDER_ID
 
 ## Requirements
 
@@ -29,14 +27,17 @@ Estrarre tutte le delibere FESR di un periodo in modo affidabile e senza interve
 - ✓ Download PDF opzionale — codebase iniziale
 - ✓ Output CSV + JSON per anno + combinato multi-anno — codebase iniziale
 - ✓ Riepiloghi aggregati (azioni, manovre, beneficiari, proponenti) — codebase iniziale
+- ✓ **DATE-01**: Filtro per DATA_DA / DATA_A in scraper.py e delibere.py — Phase 1
+- ✓ **DATE-02**: Auto-calcolo "settimana precedente" in GitHub Actions — Phase 2
+- ✓ **AUTO-01**: Cron settimanale ogni lunedì + workflow_dispatch — Phase 2
+- ✓ **AUTO-02**: Upload output su Google Drive via OAuth2 — Phase 3
+- ✓ **AUTO-03**: Email di riepilogo SMTP con link Drive — Phase 3
 
 ### Active
 
-- [ ] **DATE-01**: Utente può specificare DATA_DA e DATA_A per filtrare le delibere per periodo
-- [ ] **DATE-02**: Scraper auto-calcola "settimana precedente" quando viene richiesta l'automazione
-- [ ] **AUTO-01**: GitHub Actions esegue il download ogni settimana (cron lunedì mattina)
-- [ ] **AUTO-02**: Output (PDF + CSV/JSON) viene caricato su Google Drive dopo ogni run
-- [ ] **AUTO-03**: Email di riepilogo inviata ai destinatari configurati al termine del run
+- [ ] **PDF-01**: GitHub Actions scarica i PDF delle delibere ad ogni run automatico (SCARICA_LINK_PDF + SCARICA_PDF esposti come env var)
+- [ ] **DRIVE-01**: Il sistema crea una sottocartella Drive per ogni run con nome che include il periodo (es. `FESR_2026_W23`)
+- [ ] **DRIVE-02**: PDF + CSV riassuntivo vengono caricati nella sottocartella, non flat in GDRIVE_FOLDER_ID
 
 ### Out of Scope
 
@@ -84,4 +85,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-11 — Milestone v1.0 started*
+*Last updated: 2026-06-11 — Milestone v1.1 started*
