@@ -2,6 +2,8 @@ import csv
 import os
 import smtplib
 import sys
+from email import encoders
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
@@ -24,12 +26,18 @@ def build_summary(output_folder):
     return {"count": len(records), "azioni": azioni}
 
 
-def send_email(smtp_host, smtp_port, smtp_user, smtp_pass, recipients, subject, body):
+def send_email(smtp_host, smtp_port, smtp_user, smtp_pass, recipients, subject, body, attachments=None):
     msg = MIMEMultipart()
     msg["Subject"] = subject
     msg["From"] = smtp_user
     msg["To"] = ", ".join(recipients)
     msg.attach(MIMEText(body, "plain", "utf-8"))
+    for path in (attachments or []):
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(Path(path).read_bytes())
+        encoders.encode_base64(part)
+        part.add_header("Content-Disposition", "attachment", filename=Path(path).name)
+        msg.attach(part)
     with smtplib.SMTP(smtp_host, smtp_port) as server:
         server.starttls()
         server.login(smtp_user, smtp_pass)
@@ -69,8 +77,9 @@ def main():
         f"Cartella Drive: {drive_url}\n"
     )
 
-    send_email(smtp_host, smtp_port, smtp_user, smtp_pass, recipients, subject, body)
-    print(f"Email inviata a {len(recipients)} destinatari.")
+    attachments = sorted(Path(output_folder).glob("delibere_*.csv"))
+    send_email(smtp_host, smtp_port, smtp_user, smtp_pass, recipients, subject, body, attachments)
+    print(f"Email inviata a {len(recipients)} destinatari ({len(attachments)} allegati).")
 
 
 if __name__ == "__main__":
