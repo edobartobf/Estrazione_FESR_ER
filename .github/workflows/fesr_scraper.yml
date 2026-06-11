@@ -1,4 +1,4 @@
-# Aggiornato: Phase 4 — PDF Download abilitato in Actions
+# Aggiornato: solo_delibere input aggiunto (default: true → tipoAtto=DL)
 name: FESR Scraper
 
 on:
@@ -16,6 +16,10 @@ on:
       data_a:
         description: "Data a (DD/MM/YYYY) — lascia vuoto per settimana precedente automatica"
         required: false
+      solo_delibere:
+        description: "Solo Delibere di Giunta (true/false)"
+        required: false
+        default: "true"
 
 jobs:
   scrape:
@@ -64,6 +68,7 @@ jobs:
         run: python scraper.py
         env:
           FESR_KEYWORD: ${{ github.event.inputs.keyword }}
+          FESR_SOLO_DELIBERE: ${{ github.event.inputs.solo_delibere || 'true' }}
           FESR_SCARICA_LINK_PDF: "true"
           FESR_SCARICA_PDF: "true"
           # FESR_DATA_DA e FESR_DATA_A iniettate dal passo precedente via GITHUB_ENV

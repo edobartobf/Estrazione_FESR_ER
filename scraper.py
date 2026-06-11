@@ -54,6 +54,8 @@ ANNI = "2026"
 KEYWORD = ""
 CARTELLA_OUTPUT = "data"
 
+SOLO_DELIBERE = True  # Se True, filtra solo Delibere di Giunta (tipoAtto=DL)
+
 SCARICA_LINK_PDF = False
 SCARICA_PDF = False
 
@@ -68,7 +70,7 @@ DATA_A  = None  # Esempio: "11/06/2026"
 
 
 def applysecrets():
-    global KEYWORD, DATA_DA, DATA_A, ANNI, CARTELLA_OUTPUT, SCARICA_LINK_PDF, SCARICA_PDF
+    global KEYWORD, DATA_DA, DATA_A, ANNI, CARTELLA_OUTPUT, SCARICA_LINK_PDF, SCARICA_PDF, SOLO_DELIBERE
     val = os.environ.get("FESR_KEYWORD")
     if val:
         KEYWORD = val
@@ -90,6 +92,9 @@ def applysecrets():
     val_pdf = os.environ.get("FESR_SCARICA_PDF")
     if val_pdf is not None and val_pdf.strip():
         SCARICA_PDF = val_pdf.strip().lower() in ("true", "1", "yes")
+    val = os.environ.get("FESR_SOLO_DELIBERE")
+    if val is not None and val.strip():
+        SOLO_DELIBERE = val.strip().lower() not in ("false", "0", "no")
     # Se SCARICA_PDF è abilitato via env, i link sono prerequisito fisico del download
     if val_pdf and SCARICA_PDF and not SCARICA_LINK_PDF:
         print("AVVISO: FESR_SCARICA_LINK_PDF forzato a true perché FESR_SCARICA_PDF=true "
@@ -157,6 +162,7 @@ def main():
             outputfolder=CARTELLA_OUTPUT,
             datada=DATA_DA,
             dataa=DATA_A,
+            tipoatto="DL" if SOLO_DELIBERE else "",
         )
 
         csvpath = folder / f"delibere_{suffix}.csv"

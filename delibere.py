@@ -48,12 +48,12 @@ def decodehtml(response):
     return response.content.decode("ISO-8859-1", errors="replace")
 
 
-def buildpayload(anno, keyword, datada=None, dataa=None):
+def buildpayload(anno, keyword, datada=None, dataa=None, tipoatto=""):
     return {
         "REFRESH": "Y",
         "actionURL": "AdapterHTTP?ACTION_NAME=ACTIONRICERCADELIBERE",
         "ENTE": "1",
-        "tipoAtto": "",
+        "tipoAtto": tipoatto,
         "annoAdozione": str(anno),
         "numAdozione": "",
         "dataAdozioneDa": datada or "",
@@ -65,7 +65,7 @@ def buildpayload(anno, keyword, datada=None, dataa=None):
     }
 
 
-def buildpageparams(anno, keyword, page, datada=None, dataa=None):
+def buildpageparams(anno, keyword, page, datada=None, dataa=None, tipoatto=""):
     return {
         "ANNOADOZIONE": str(anno),
         "REFRESH": "Y",
@@ -76,7 +76,7 @@ def buildpageparams(anno, keyword, page, datada=None, dataa=None):
         "TABLEID": "ricerca_delibere",
         "HTML_POINTER": "submitRicerca",
         "PAG_SIZE_RICERCA_DELIBERE": "10",
-        "TIPOATTO": "",
+        "TIPOATTO": tipoatto,
         "DATAADOZIONEA": dataa or "",
         "DATAADOZIONEDA": datada or "",
         "NUMADOZIONE": "",
@@ -86,16 +86,16 @@ def buildpageparams(anno, keyword, page, datada=None, dataa=None):
     }
 
 
-def fetchfirstpage(session, anno, keyword, timeout, datada=None, dataa=None):
-    response = session.post(BASE_URL, data=buildpayload(anno, keyword, datada=datada, dataa=dataa), timeout=timeout)
+def fetchfirstpage(session, anno, keyword, timeout, datada=None, dataa=None, tipoatto=""):
+    response = session.post(BASE_URL, data=buildpayload(anno, keyword, datada=datada, dataa=dataa, tipoatto=tipoatto), timeout=timeout)
     response.raise_for_status()
     return decodehtml(response)
 
 
-def fetchpage(session, anno, keyword, page, timeout, datada=None, dataa=None):
+def fetchpage(session, anno, keyword, page, timeout, datada=None, dataa=None, tipoatto=""):
     if page == 1:
-        return fetchfirstpage(session, anno, keyword, timeout, datada=datada, dataa=dataa)
-    response = session.get(BASE_URL, params=buildpageparams(anno, keyword, page, datada=datada, dataa=dataa), timeout=timeout)
+        return fetchfirstpage(session, anno, keyword, timeout, datada=datada, dataa=dataa, tipoatto=tipoatto)
+    response = session.get(BASE_URL, params=buildpageparams(anno, keyword, page, datada=datada, dataa=dataa, tipoatto=tipoatto), timeout=timeout)
     response.raise_for_status()
     return decodehtml(response)
 
@@ -268,6 +268,7 @@ def scraperesults(
     outputfolder="data",
     datada=None,
     dataa=None,
+    tipoatto="",
 ):
     for label, value in (("datada", datada), ("dataa", dataa)):
         if value is not None:
@@ -282,7 +283,7 @@ def scraperesults(
     page = 1
     pdfcount = 0
     while True:
-        html = fetchpage(session, anno, keyword, page, timeout, datada=datada, dataa=dataa)
+        html = fetchpage(session, anno, keyword, page, timeout, datada=datada, dataa=dataa, tipoatto=tipoatto)
         records, counter = parserows(html, anno, keyword, page)
         if totalpages is None:
             totalpages = counter.get("total_pages") or 1
