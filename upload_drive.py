@@ -47,14 +47,24 @@ def build_credentials(client_id, client_secret, refresh_token):
     return creds
 
 
-def upload_folder(folder_path, folder_id, creds):
-    service = build("drive", "v3", credentials=creds)
+def create_subfolder(service, parent_id, name):
+    body = {
+        "name": name,
+        "mimeType": "application/vnd.google-apps.folder",
+        "parents": [parent_id],
+    }
+    result = service.files().create(body=body, fields="id").execute()
+    print(f"Sottocartella creata: {name}")
+    return result["id"]
+
+
+def upload_to_subfolder(folder_path, subfolder_id, service):
     uploaded = []
     for f in Path(folder_path).rglob("*"):
         if not f.is_file():
             continue
         media = MediaFileUpload(str(f), resumable=True)
-        metadata = {"name": f.name, "parents": [folder_id]}
+        metadata = {"name": f.name, "parents": [subfolder_id]}
         result = service.files().create(
             body=metadata, media_body=media, fields="id,name"
         ).execute()
@@ -81,10 +91,15 @@ def main():
             sys.exit(1)
 
     creds = build_credentials(client_id, client_secret, refresh_token)
-    uploaded = upload_folder(output_folder, folder_id, creds)
-    folder_url = f"https://drive.google.com/drive/folders/{folder_id}"
-    print(f"Caricati {len(uploaded)} file su Drive: {folder_url}")
-    Path("drive_url.txt").write_text(folder_url, encoding="utf-8")
+    service = build("drive", "v3", credentials=creds)
+    datada = os.environ.get("FESR_DATA_DA")
+    dataa = os.environ.get("FESR_DATA_A")
+    cartella_nome = nome_cartella(datada, dataa)
+    subfolder_id = create_subfolder(service, folder_id, cartella_nome)
+    uploaded = upload_to_subfolder(output_folder, subfolder_id, service)
+    subfolder_url = f"https://drive.google.com/drive/folders/{subfolder_id}"
+    print(f"Caricati {len(uploaded)} file su Drive: {subfolder_url}")
+    Path("drive_url.txt").write_text(subfolder_url, encoding="utf-8")
 
 
 if __name__ == "__main__":
