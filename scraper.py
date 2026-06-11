@@ -84,14 +84,16 @@ def applysecrets():
     val = os.environ.get("FESR_OUTPUT")
     if val:
         CARTELLA_OUTPUT = val
-    val = os.environ.get("FESR_SCARICA_LINK_PDF")
-    if val:
-        SCARICA_LINK_PDF = val.strip().lower() in ("true", "1", "yes")
-    val = os.environ.get("FESR_SCARICA_PDF")
-    if val:
-        SCARICA_PDF = val.strip().lower() in ("true", "1", "yes")
-    # Se SCARICA_PDF è abilitato, i link sono prerequisito fisico del download
-    if SCARICA_PDF:
+    val_link = os.environ.get("FESR_SCARICA_LINK_PDF")
+    if val_link is not None and val_link.strip():
+        SCARICA_LINK_PDF = val_link.strip().lower() in ("true", "1", "yes")
+    val_pdf = os.environ.get("FESR_SCARICA_PDF")
+    if val_pdf is not None and val_pdf.strip():
+        SCARICA_PDF = val_pdf.strip().lower() in ("true", "1", "yes")
+    # Se SCARICA_PDF è abilitato via env, i link sono prerequisito fisico del download
+    if val_pdf and SCARICA_PDF and not SCARICA_LINK_PDF:
+        print("AVVISO: FESR_SCARICA_LINK_PDF forzato a true perché FESR_SCARICA_PDF=true "
+              "(i link sono prerequisito del download).")
         SCARICA_LINK_PDF = True
 
 
