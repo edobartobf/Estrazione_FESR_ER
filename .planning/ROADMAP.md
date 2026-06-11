@@ -14,7 +14,7 @@
 ## Phases
 
 - [x] **Phase 4: PDF Download in Actions** — Il workflow GitHub Actions scarica i PDF delle delibere abilitando SCARICA_LINK_PDF e SCARICA_PDF tramite env var
-- [ ] **Phase 5: Drive Subfolder Upload** — upload_drive.py crea una sottocartella datata in Drive e carica PDF + CSV riassuntivo al suo interno
+- [x] **Phase 5: Drive Subfolder Upload** — upload_drive.py crea una sottocartella datata in Drive e carica PDF + CSV riassuntivo al suo interno
 
 ---
 
@@ -44,7 +44,7 @@ Plans:
   4. L'email di riepilogo linka alla sottocartella corretta (già usa drive_url.txt — invariato)
 **Plans**: 1 plan
 Plans:
-- [ ] 05-01-PLAN.md — upload_drive.py: aggiunge `create_subfolder()`, rinomina logica upload in `upload_to_subfolder()`, nome cartella da `FESR_DATA_DA`/`FESR_DATA_A` (env, stessa convenzione datesuffix di scraper.py)
+- [x] 05-01-PLAN.md — upload_drive.py: aggiunge `create_subfolder()`, rinomina logica upload in `upload_to_subfolder()`, nome cartella da `FESR_DATA_DA`/`FESR_DATA_A` (env, stessa convenzione datesuffix di scraper.py)
 
 ---
 
@@ -53,4 +53,4 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 4. PDF Download in Actions | 2/2 | Complete | 2026-06-11 |
-| 5. Drive Subfolder Upload | 0/1 | Pending | — |
+| 5. Drive Subfolder Upload | 1/1 | Complete | 2026-06-11 |

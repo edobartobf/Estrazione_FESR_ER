@@ -3,22 +3,22 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: executing
-last_updated: "2026-06-11T12:42:00.000Z"
-last_activity: 2026-06-11 — Completed 04-02-PLAN.md
+last_updated: "2026-06-11T13:15:00.000Z"
+last_activity: 2026-06-11 — Completed 05-01-PLAN.md
 progress:
   total_phases: 2
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 75
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
+  percent: 100
 ---
 
 ## Current Position
 
-Phase: 04-pdf-download
-Plan: 04-02 (COMPLETE)
-Status: In progress — plans 04-01 and 04-02 done; PDF-01 satisfied
-Last activity: 2026-06-11 — Completed 04-02-PLAN.md
+Phase: 05-drive-subfolder-upload
+Plan: 05-01 (COMPLETE)
+Status: Milestone v1.1 complete — all phases done (PDF-01, DRIVE-01, DRIVE-02 satisfied)
+Last activity: 2026-06-11 — Completed 05-01-PLAN.md
 
 ## Project Reference
 
@@ -37,7 +37,9 @@ See: .planning/PROJECT.md
 - drive_url.txt come interfaccia tra upload_drive.py e notify_email.py
 - SCARICA_PDF / SCARICA_LINK_PDF esposti come env var FESR_SCARICA_PDF / FESR_SCARICA_LINK_PDF in applysecrets() — bool parsing via ("true","1","yes"); implicazione prerequisito: SCARICA_PDF=True forza SCARICA_LINK_PDF=True (04-01)
 - FESR_SCARICA_LINK_PDF: "true" e FESR_SCARICA_PDF: "true" hardcoded nel passo Esegui scraper di fesr_scraper.yml — download PDF abilitato in ogni run automatico (04-02)
-- upload_drive.py carica flat in GDRIVE_FOLDER_ID senza creare sottocartelle (gap da colmare in v1.1)
+- upload_drive.py ora crea sottocartella datata (FESR_{datesuffix}) in GDRIVE_FOLDER_ID e carica tutti i file al suo interno; drive_url.txt punta alla sottocartella
+- datesuffix() duplicato inline in upload_drive.py (nessun import da scraper.py) per mantenere gli script indipendenti
+- Service OAuth2 costruito una sola volta in main() e passato a create_subfolder() e upload_to_subfolder()
 
 ### Blockers
 

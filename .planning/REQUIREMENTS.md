@@ -15,8 +15,8 @@ Abilitare il download dei PDF delle delibere nell'automazione settimanale e orga
 
 ### DRIVE — Organizzazione sottocartella Drive
 
-- [ ] **DRIVE-01**: Per ogni run, `upload_drive.py` crea una sottocartella in `GDRIVE_FOLDER_ID` con nome che include il periodo di riferimento (es. `FESR_2026_W23` o `FESR_04giu_10giu`)
-- [ ] **DRIVE-02**: PDF scaricati + CSV riassuntivo vengono caricati nella sottocartella, non flat in `GDRIVE_FOLDER_ID`; `drive_url.txt` contiene il link diretto alla sottocartella
+- [x] **DRIVE-01**: Per ogni run, `upload_drive.py` crea una sottocartella in `GDRIVE_FOLDER_ID` con nome che include il periodo di riferimento (es. `FESR_2026_W23` o `FESR_04giu_10giu`)
+- [x] **DRIVE-02**: PDF scaricati + CSV riassuntivo vengono caricati nella sottocartella, non flat in `GDRIVE_FOLDER_ID`; `drive_url.txt` contiene il link diretto alla sottocartella
 
 ---
 
@@ -57,5 +57,5 @@ Abilitare il download dei PDF delle delibere nell'automazione settimanale e orga
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
 | PDF-01 | Phase 4 | Complete (04-01 + 04-02, 2026-06-11) |
-| DRIVE-01 | Phase 5 | Pending |
-| DRIVE-02 | Phase 5 | Pending |
+| DRIVE-01 | Phase 5 | Complete (05-01, 2026-06-11) |
+| DRIVE-02 | Phase 5 | Complete (05-01, 2026-06-11) |
