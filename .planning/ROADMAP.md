@@ -1,65 +1,50 @@
-# ROADMAP — Milestone v1.0
-# Filtro per periodo + Automazione settimanale
+# ROADMAP — Milestone v1.1
+# Drive PDF + Cartella Settimanale
 
 ## Overview
 
-**Milestone goal:** Aggiungere il filtraggio per data al motore di scraping e automatizzare il download settimanale via GitHub Actions con notifica email e upload su Google Drive.
+**Milestone goal:** Caricare i PDF delle delibere su Google Drive insieme al CSV riassuntivo, organizzati in una sottocartella denominata con il periodo di riferimento.
 
-**Phases:** 3
-**Requirements:** 8 (DATE-01–03, AUTO-01–05)
-**Coverage:** 8/8 ✓
+**Phases:** 2
+**Requirements:** 3 (PDF-01, DRIVE-01, DRIVE-02)
+**Coverage:** 3/3 ✓
 
 ---
 
 ## Phases
 
-- [x] **Phase 1: Date Filtering** - Il motore di scraping espone il filtro per periodo; i file di output riflettono il range usato
-- [x] **Phase 2: GitHub Actions Skeleton** - Il workflow CI/CD esegue lo scraping settimanale e manuale con configurazione tramite Secrets
-- [x] **Phase 3: Drive Upload + Email Notification** - Gli output vengono caricati su Google Drive e viene inviata email di riepilogo
+- [ ] **Phase 4: PDF Download in Actions** — Il workflow GitHub Actions scarica i PDF delle delibere abilitando SCARICA_LINK_PDF e SCARICA_PDF tramite env var
+- [ ] **Phase 5: Drive Subfolder Upload** — upload_drive.py crea una sottocartella datata in Drive e carica PDF + CSV riassuntivo al suo interno
 
 ---
 
 ## Phase Details
 
-### Phase 1: Date Filtering
-**Goal**: Gli analisti possono filtrare le delibere per periodo di adozione senza toccare il codice del portale
-**Depends on**: Nothing (first phase)
-**Requirements**: DATE-01, DATE-02, DATE-03
+### Phase 4: PDF Download in Actions
+**Goal**: Lo scraping settimanale scarica anche i PDF delle delibere, senza modifiche manuali a scraper.py
+**Depends on**: Nothing (v1.0 Phase 3 already complete)
+**Requirements**: PDF-01
 **Success Criteria** (what must be TRUE):
-  1. Impostando DATA_DA e DATA_A in scraper.py, il CSV/JSON risultante contiene solo delibere adottate nel periodo specificato
-  2. Con DATA_DA / DATA_A lasciati a None, il comportamento è identico all'attuale (nessun filtro, anno intero)
-  3. I file di output generati con filtro attivo includono le date nel nome (es. `delibere_2026_04giu_11giu_fesr.csv`)
+  1. Aggiungendo `FESR_SCARICA_PDF=true` e `FESR_SCARICA_LINK_PDF=true` come env var al run, i PDF vengono scaricati nella cartella `data/pdf/`
+  2. Il workflow GitHub Actions attiva il download PDF ad ogni run automatico (cron) senza intervento manuale
+  3. Se non ci sono delibere con link PDF, il run termina senza errori (zero PDF scaricati è un esito valido)
 **Plans**: 2 plans
 Plans:
-- [x] 01-01-PLAN.md — delibere.py: add datada/dataa to scraperesults, buildpayload, buildpageparams, fetchpage; DD/MM/YYYY validation; writesummaries date_suffix
-- [x] 01-02-PLAN.md — scraper.py: DATA_DA/DATA_A config vars, datesuffix() helper, wire date tokens into filenames and forward to scraperesults/writesummaries
+- [ ] 04-01-PLAN.md — scraper.py: aggiunge `FESR_SCARICA_LINK_PDF` e `FESR_SCARICA_PDF` a `applysecrets()` con parsing bool (true/1/yes)
+- [ ] 04-02-PLAN.md — fesr_scraper.yml: aggiunge `FESR_SCARICA_LINK_PDF: "true"` e `FESR_SCARICA_PDF: "true"` nell'env del passo "Esegui scraper"
 
-### Phase 2: GitHub Actions Skeleton
-**Goal**: Lo scraping settimanale parte automaticamente ogni lunedì e può essere lanciato manualmente con parametri custom, senza credenziali nel codice
-**Depends on**: Phase 1
-**Requirements**: AUTO-01, AUTO-02, AUTO-05
+### Phase 5: Drive Subfolder Upload
+**Goal**: Ogni run carica i propri file (PDF + CSV riassuntivo) in una sottocartella Drive denominata con il periodo, lasciando GDRIVE_FOLDER_ID come cartella root organizzata per settimana
+**Depends on**: Phase 4
+**Requirements**: DRIVE-01, DRIVE-02
 **Success Criteria** (what must be TRUE):
-  1. Il workflow si attiva ogni lunedì mattina (cron), calcola automaticamente il range lun–dom della settimana precedente e completa lo scraping FESR senza intervento manuale
-  2. Avviando il workflow manualmente (workflow_dispatch) con keyword e date custom, il run utilizza quei parametri invece dei valori di default
-  3. Rimuovendo i GitHub Secrets dal repository, il workflow fallisce con errore esplicito — zero credenziali hard-coded nel sorgente
-**Plans**: 2 plans
+  1. Dopo un run, in `GDRIVE_FOLDER_ID` esiste una nuova sottocartella con nome tipo `FESR_04giu_10giu` (o `FESR_2026_W23`) contenente tutti i file caricati
+  2. `drive_url.txt` contiene il link diretto alla sottocartella, non alla cartella root
+  3. I run successivi creano nuove sottocartelle separate, non sovrascrivono quella precedente
+  4. L'email di riepilogo linka alla sottocartella corretta (già usa drive_url.txt — invariato)
+**Plans**: 1 plan
 Plans:
-- [x] 02-01-PLAN.md — scraper.py: applysecrets() reads FESR_* env vars, called from main()
-- [x] 02-02-PLAN.md — .github/workflows/fesr_scraper.yml: cron + dispatch, date computation, env-var driven scraper
-
-### Phase 3: Drive Upload + Email Notification
-**Goal**: Al termine di ogni run automatizzato, gli output sono disponibili su Google Drive e i destinatari ricevono un riepilogo via email
-**Depends on**: Phase 2
-**Requirements**: AUTO-03, AUTO-04
-**Success Criteria** (what must be TRUE):
-  1. Dopo un run completato, tutti i file di output (CSV/JSON + PDF) appaiono nella cartella Google Drive configurata, accessibili tramite il link nella email
-  2. I destinatari configurati ricevono un'email con conteggio delle delibere trovate, azioni identificate e link diretto alla cartella Drive
-  3. Un run con zero delibere trovate invia comunque email di riepilogo (conteggio = 0) invece di fallire silenziosamente
-**Plans**: 3 plans
-Plans:
-- [x] 03-01-PLAN.md — upload_drive.py: Service Account upload to Drive, writes drive_url.txt
-- [x] 03-02-PLAN.md — notify_email.py: SMTP email with delibere count, azioni, Drive link
-- [x] 03-03-PLAN.md — .github/workflows/fesr_scraper.yml: activate Phase 3 steps
+- [ ] 05-01-PLAN.md — upload_drive.py: aggiunge `create_subfolder()`, rinomina logica upload in `upload_to_subfolder()`, nome cartella da `FESR_DATA_DA`/`FESR_DATA_A` (env, stessa convenzione datesuffix di scraper.py)
 
 ---
 
@@ -67,6 +52,5 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Date Filtering | 2/2 | Complete | 2026-06-11 |
-| 2. GitHub Actions Skeleton | 2/2 | Complete | 2026-06-11 |
-| 3. Drive Upload + Email Notification | 3/3 | Complete | 2026-06-11 |
+| 4. PDF Download in Actions | 0/2 | Pending | — |
+| 5. Drive Subfolder Upload | 0/1 | Pending | — |
