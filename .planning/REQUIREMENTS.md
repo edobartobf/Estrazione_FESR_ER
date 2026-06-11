@@ -1,35 +1,44 @@
-# Requirements — Milestone v1.0
-# Filtro per periodo + Automazione settimanale
+# Requirements — Milestone v1.1
+# Drive PDF + Cartella Settimanale
 
 ## Milestone Scope
 
-Aggiungere il filtraggio per data al motore di scraping ed automatizzare il download settimanale via GitHub Actions con upload su Google Drive e notifica email.
+Abilitare il download dei PDF delle delibere nell'automazione settimanale e organizzare gli upload su Drive in una sottocartella denominata con il periodo di riferimento, contenente PDF + CSV riassuntivo.
 
 ---
 
 ## Active Requirements
 
-### DATE — Filtro per periodo
+### PDF — Download PDF nell'automazione
 
-- [ ] **DATE-01**: Utente può impostare `DATA_DA` e `DATA_A` in `scraper.py` per filtrare le delibere per data di adozione (formato DD/MM/YYYY)
-- [ ] **DATE-02**: Se `DATA_DA` / `DATA_A` sono `None`, il comportamento rimane identico all'attuale (nessun filtro data, ricerca per anno intero)
-- [ ] **DATE-03**: I file di output includono il periodo nella nomenclatura quando il filtro data è attivo (es. `delibere_2026_04giu_11giu_fesr.csv`)
+- [ ] **PDF-01**: Il workflow GitHub Actions scarica i PDF delle delibere ad ogni run automatico (`SCARICA_LINK_PDF=True` e `SCARICA_PDF=True` esposti tramite env var `FESR_SCARICA_LINK_PDF` / `FESR_SCARICA_PDF` in `applysecrets()`)
 
-### AUTO — Automazione GitHub Actions
+### DRIVE — Organizzazione sottocartella Drive
 
-- [ ] **AUTO-01**: GitHub Actions esegue lo scraping ogni lunedì mattina calcolando automaticamente il range lun–dom della settimana precedente
-- [ ] **AUTO-02**: Il workflow è eseguibile manualmente (`workflow_dispatch`) con parametri opzionali per keyword e date custom
-- [ ] **AUTO-03**: Al termine del run, tutti gli output (CSV/JSON + PDF) vengono caricati su una cartella Google Drive via Service Account JSON
-- [ ] **AUTO-04**: Email di riepilogo inviata via SMTP ai destinatari configurati, con conteggio delibere, azioni trovate e link alla cartella Drive
-- [ ] **AUTO-05**: Tutta la configurazione sensibile (Drive Service Account JSON, SMTP host/user/pass, email recipients) è gestita tramite GitHub Secrets — zero modifiche al codice tra un run e l'altro
+- [ ] **DRIVE-01**: Per ogni run, `upload_drive.py` crea una sottocartella in `GDRIVE_FOLDER_ID` con nome che include il periodo di riferimento (es. `FESR_2026_W23` o `FESR_04giu_10giu`)
+- [ ] **DRIVE-02**: PDF scaricati + CSV riassuntivo vengono caricati nella sottocartella, non flat in `GDRIVE_FOLDER_ID`; `drive_url.txt` contiene il link diretto alla sottocartella
+
+---
+
+## Validated (da v1.0)
+
+- ✓ **DATE-01**: Filtro per DATA_DA / DATA_A — Phase 1
+- ✓ **DATE-02**: Auto-calcolo "settimana precedente" in GitHub Actions — Phase 2
+- ✓ **DATE-03**: Nome file include il periodo quando filtro attivo — Phase 1
+- ✓ **AUTO-01**: Cron settimanale ogni lunedì + workflow_dispatch — Phase 2
+- ✓ **AUTO-02**: workflow_dispatch con parametri opzionali — Phase 2
+- ✓ **AUTO-03**: Upload su Google Drive — Phase 3
+- ✓ **AUTO-04**: Email di riepilogo SMTP — Phase 3
+- ✓ **AUTO-05**: Configurazione sensibile via GitHub Secrets — Phase 2
 
 ---
 
 ## Future Requirements
 
-- Invio differenziale (solo delibere nuove rispetto all'ultima run)
+- Invio differenziale (solo delibere nuove rispetto all'ultimo run)
 - Notifica Slack / Teams in aggiunta o alternativa all'email
 - Filtro per tipo atto oltre che per keyword e periodo
+- MAX_PDF configurabile via env var per limitare i download in Actions
 
 ---
 
@@ -38,8 +47,8 @@ Aggiungere il filtraggio per data al motore di scraping ed automatizzare il down
 - **Interfaccia web** — strumento CLI/automazione, non serve UI
 - **Database relazionale** — output flat file (CSV/JSON) è sufficiente
 - **Ricerca full-text nei PDF** — solo download e catalogazione
-- **Date range cross-anno** — la ricerca per anno è mantenuta come granularità principale dell'API SIIR
-- **Google Workspace** — si usa account personale con Service Account GCP gratuito
+- **Date range cross-anno** — granularità per anno mantenuta come principale
+- **Deduplicazione tra run** — ogni run è indipendente
 
 ---
 
@@ -47,11 +56,6 @@ Aggiungere il filtraggio per data al motore di scraping ed automatizzare il down
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| DATE-01 | Phase 1 | Pending |
-| DATE-02 | Phase 1 | Pending |
-| DATE-03 | Phase 1 | Pending |
-| AUTO-01 | Phase 2 | Pending |
-| AUTO-02 | Phase 2 | Pending |
-| AUTO-05 | Phase 2 | Pending |
-| AUTO-03 | Phase 3 | Pending |
-| AUTO-04 | Phase 3 | Pending |
+| PDF-01 | Phase 4 | Pending |
+| DRIVE-01 | Phase 5 | Pending |
+| DRIVE-02 | Phase 5 | Pending |
