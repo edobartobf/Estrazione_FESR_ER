@@ -11,7 +11,7 @@ Abilitare il download dei PDF delle delibere nell'automazione settimanale e orga
 
 ### PDF — Download PDF nell'automazione
 
-- [ ] **PDF-01**: Il workflow GitHub Actions scarica i PDF delle delibere ad ogni run automatico (`SCARICA_LINK_PDF=True` e `SCARICA_PDF=True` esposti tramite env var `FESR_SCARICA_LINK_PDF` / `FESR_SCARICA_PDF` in `applysecrets()`)
+- [x] **PDF-01**: Il workflow GitHub Actions scarica i PDF delle delibere ad ogni run automatico (`SCARICA_LINK_PDF=True` e `SCARICA_PDF=True` esposti tramite env var `FESR_SCARICA_LINK_PDF` / `FESR_SCARICA_PDF` in `applysecrets()`)
 
 ### DRIVE — Organizzazione sottocartella Drive
 
@@ -56,6 +56,6 @@ Abilitare il download dei PDF delle delibere nell'automazione settimanale e orga
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| PDF-01 | Phase 4 | In progress (04-01 done, 04-02 pending) |
+| PDF-01 | Phase 4 | Complete (04-01 + 04-02, 2026-06-11) |
 | DRIVE-01 | Phase 5 | Pending |
 | DRIVE-02 | Phase 5 | Pending |

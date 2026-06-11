@@ -13,7 +13,7 @@
 
 ## Phases
 
-- [ ] **Phase 4: PDF Download in Actions** — Il workflow GitHub Actions scarica i PDF delle delibere abilitando SCARICA_LINK_PDF e SCARICA_PDF tramite env var
+- [x] **Phase 4: PDF Download in Actions** — Il workflow GitHub Actions scarica i PDF delle delibere abilitando SCARICA_LINK_PDF e SCARICA_PDF tramite env var
 - [ ] **Phase 5: Drive Subfolder Upload** — upload_drive.py crea una sottocartella datata in Drive e carica PDF + CSV riassuntivo al suo interno
 
 ---
@@ -31,7 +31,7 @@
 **Plans**: 2 plans
 Plans:
 - [x] 04-01-PLAN.md — scraper.py: aggiunge `FESR_SCARICA_LINK_PDF` e `FESR_SCARICA_PDF` a `applysecrets()` con parsing bool (true/1/yes)
-- [ ] 04-02-PLAN.md — fesr_scraper.yml: aggiunge `FESR_SCARICA_LINK_PDF: "true"` e `FESR_SCARICA_PDF: "true"` nell'env del passo "Esegui scraper"
+- [x] 04-02-PLAN.md — fesr_scraper.yml: aggiunge `FESR_SCARICA_LINK_PDF: "true"` e `FESR_SCARICA_PDF: "true"` nell'env del passo "Esegui scraper"
 
 ### Phase 5: Drive Subfolder Upload
 **Goal**: Ogni run carica i propri file (PDF + CSV riassuntivo) in una sottocartella Drive denominata con il periodo, lasciando GDRIVE_FOLDER_ID come cartella root organizzata per settimana
@@ -52,5 +52,5 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 4. PDF Download in Actions | 1/2 | In progress | — |
+| 4. PDF Download in Actions | 2/2 | Complete | 2026-06-11 |
 | 5. Drive Subfolder Upload | 0/1 | Pending | — |
