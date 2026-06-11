@@ -51,7 +51,7 @@ from delibere import scraperesults, writecsv, writejson, writesummaries
 #   DATA_A  = "11/06/2026"
 
 ANNI = "2026"
-KEYWORD = "FESR"
+KEYWORD = ""
 CARTELLA_OUTPUT = "data"
 
 SCARICA_LINK_PDF = False
