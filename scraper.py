@@ -68,7 +68,7 @@ DATA_A  = None  # Esempio: "11/06/2026"
 
 
 def applysecrets():
-    global KEYWORD, DATA_DA, DATA_A, ANNI, CARTELLA_OUTPUT
+    global KEYWORD, DATA_DA, DATA_A, ANNI, CARTELLA_OUTPUT, SCARICA_LINK_PDF, SCARICA_PDF
     val = os.environ.get("FESR_KEYWORD")
     if val:
         KEYWORD = val
@@ -84,6 +84,15 @@ def applysecrets():
     val = os.environ.get("FESR_OUTPUT")
     if val:
         CARTELLA_OUTPUT = val
+    val = os.environ.get("FESR_SCARICA_LINK_PDF")
+    if val:
+        SCARICA_LINK_PDF = val.strip().lower() in ("true", "1", "yes")
+    val = os.environ.get("FESR_SCARICA_PDF")
+    if val:
+        SCARICA_PDF = val.strip().lower() in ("true", "1", "yes")
+    # Se SCARICA_PDF è abilitato, i link sono prerequisito fisico del download
+    if SCARICA_PDF:
+        SCARICA_LINK_PDF = True
 
 
 def leggianni(value):
