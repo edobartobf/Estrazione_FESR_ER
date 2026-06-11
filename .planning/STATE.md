@@ -1,20 +1,20 @@
 ---
 milestone: "v1.1"
 name: "Drive PDF + Cartella Settimanale"
-status: planning
+status: in-progress
 progress:
   phases_total: 2
   phases_done: 0
-  tasks_total: 0
-  tasks_done: 0
+  tasks_total: 1
+  tasks_done: 1
 ---
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-06-11 — Milestone v1.1 started
+Phase: 04-pdf-download
+Plan: 04-01 (COMPLETE)
+Status: In progress — plan 04-01 done, moving to 04-02
+Last activity: 2026-06-11 — Completed 04-01-PLAN.md
 
 ## Project Reference
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md
 - DATA_DA / DATA_A in scraper.py come config vars (default None = nessun filtro)
 - Env var override via applysecrets() (FESR_* prefix)
 - drive_url.txt come interfaccia tra upload_drive.py e notify_email.py
-- SCARICA_PDF / SCARICA_LINK_PDF hardcoded a False in scraper.py — NON esposti come env var (gap da colmare in v1.1)
+- SCARICA_PDF / SCARICA_LINK_PDF esposti come env var FESR_SCARICA_PDF / FESR_SCARICA_LINK_PDF in applysecrets() — bool parsing via ("true","1","yes"); implicazione prerequisito: SCARICA_PDF=True forza SCARICA_LINK_PDF=True (04-01)
 - upload_drive.py carica flat in GDRIVE_FOLDER_ID senza creare sottocartelle (gap da colmare in v1.1)
 
 ### Blockers

@@ -56,6 +56,6 @@ Abilitare il download dei PDF delle delibere nell'automazione settimanale e orga
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| PDF-01 | Phase 4 | Pending |
+| PDF-01 | Phase 4 | In progress (04-01 done, 04-02 pending) |
 | DRIVE-01 | Phase 5 | Pending |
 | DRIVE-02 | Phase 5 | Pending |

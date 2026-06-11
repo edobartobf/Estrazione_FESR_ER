@@ -30,7 +30,7 @@
   3. Se non ci sono delibere con link PDF, il run termina senza errori (zero PDF scaricati è un esito valido)
 **Plans**: 2 plans
 Plans:
-- [ ] 04-01-PLAN.md — scraper.py: aggiunge `FESR_SCARICA_LINK_PDF` e `FESR_SCARICA_PDF` a `applysecrets()` con parsing bool (true/1/yes)
+- [x] 04-01-PLAN.md — scraper.py: aggiunge `FESR_SCARICA_LINK_PDF` e `FESR_SCARICA_PDF` a `applysecrets()` con parsing bool (true/1/yes)
 - [ ] 04-02-PLAN.md — fesr_scraper.yml: aggiunge `FESR_SCARICA_LINK_PDF: "true"` e `FESR_SCARICA_PDF: "true"` nell'env del passo "Esegui scraper"
 
 ### Phase 5: Drive Subfolder Upload
@@ -52,5 +52,5 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 4. PDF Download in Actions | 0/2 | Pending | — |
+| 4. PDF Download in Actions | 1/2 | In progress | — |
 | 5. Drive Subfolder Upload | 0/1 | Pending | — |
