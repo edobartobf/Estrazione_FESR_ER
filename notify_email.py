@@ -69,9 +69,9 @@ def main():
     recipients = [r.strip() for r in recipients_raw.split(",") if r.strip()]
     azioni_str = ", ".join(summary["azioni"]) if summary["azioni"] else "nessuna"
 
-    subject = f"FESR Scraper — {summary['count']} delibere trovate"
+    subject = f"Delibere Regione ER — {summary['count']} delibere trovate"
     body = (
-        f"Riepilogo FESR — run automatico\n\n"
+        f"Riepilogo delibere — run automatico\n\n"
         f"Delibere trovate: {summary['count']}\n"
         f"Azioni identificate: {azioni_str}\n"
         f"Cartella Drive: {drive_url}\n"
