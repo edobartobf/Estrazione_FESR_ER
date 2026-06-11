@@ -64,6 +64,8 @@ jobs:
         run: python scraper.py
         env:
           FESR_KEYWORD: ${{ github.event.inputs.keyword || 'FESR' }}
+          FESR_SCARICA_LINK_PDF: "true"
+          FESR_SCARICA_PDF: "true"
           # FESR_DATA_DA e FESR_DATA_A iniettate dal passo precedente via GITHUB_ENV
 
       - name: Carica output
