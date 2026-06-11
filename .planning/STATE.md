@@ -1,7 +1,7 @@
 ---
 milestone: "v1.0"
 name: "Filtro per periodo + Automazione settimanale"
-status: planning
+status: in_progress
 progress:
   phases_total: 3
   phases_done: 0
@@ -11,10 +11,10 @@ progress:
 
 ## Current Position
 
-Phase: Not started (roadmap defined, awaiting phase planning)
-Plan: —
-Status: Roadmap created
-Last activity: 2026-06-11 — Roadmap v1.0 created (3 phases)
+Phase: 1 — Date Filtering (planned, ready to execute)
+Plan: 2 plans in 2 waves
+Status: Ready to execute
+Last activity: 2026-06-11 — Phase 1 planned (2 plans: 01-01-PLAN.md, 01-02-PLAN.md)
 
 ## Project Reference
 
@@ -34,4 +34,4 @@ See: .planning/PROJECT.md (updated 2026-06-11)
 (none)
 
 ### Todos
-- Plan Phase 1: Date Filtering (DATE-01, DATE-02, DATE-03)
+- Execute Phase 1: Date Filtering

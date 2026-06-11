@@ -29,7 +29,10 @@
   1. Impostando DATA_DA e DATA_A in scraper.py, il CSV/JSON risultante contiene solo delibere adottate nel periodo specificato
   2. Con DATA_DA / DATA_A lasciati a None, il comportamento è identico all'attuale (nessun filtro, anno intero)
   3. I file di output generati con filtro attivo includono le date nel nome (es. `delibere_2026_04giu_11giu_fesr.csv`)
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 01-01-PLAN.md — delibere.py: add datada/dataa to scraperesults, buildpayload, buildpageparams, fetchpage; DD/MM/YYYY validation; writesummaries date_suffix
+- [ ] 01-02-PLAN.md — scraper.py: DATA_DA/DATA_A config vars, datesuffix() helper, wire date tokens into filenames and forward to scraperesults/writesummaries
 
 ### Phase 2: GitHub Actions Skeleton
 **Goal**: Lo scraping settimanale parte automaticamente ogni lunedì e può essere lanciato manualmente con parametri custom, senza credenziali nel codice
@@ -57,6 +60,6 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Date Filtering | 0/0 | Not started | - |
+| 1. Date Filtering | 0/2 | Planned | - |
 | 2. GitHub Actions Skeleton | 0/0 | Not started | - |
 | 3. Drive Upload + Email Notification | 0/0 | Not started | - |
